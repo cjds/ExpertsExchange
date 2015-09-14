@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import java.io.IOException;
 
@@ -27,6 +28,7 @@ public class Transfer {
             SQLiteDatabase db=myDbHelper.getReadableDatabase();
             String[] projection =expertStep.columns;
 
+
 // How you want the results sorted in the resulting Cursor
             String sortOrder =  "id_order ASC";
 
@@ -45,10 +47,24 @@ public class Transfer {
             while (c.isAfterLast() == false) {
              //   view.append("n" + cur.getString(1));
                 String text=c.getString(c.getColumnIndexOrThrow("instruction"));
-                String type=c.getInt(c.getColumnIndexOrThrow("media_type"))==0?"Video":"Photo";
+                String t=c.getString(c.getColumnIndexOrThrow("media_type"));
+                String type="";
+
+                if(t==null){
+                    type="None";
+                }
+                else{
+                    Log.d("uuhiu", t+"");
+                    if(t.equals("1"))type="Video";
+                    else type="Photo";
+
+                }
                 String path=c.getString(c.getColumnIndexOrThrow("media_path"));
+                long id=c.getLong(c.getColumnIndexOrThrow("_id"));
+                if(path==null)
+                    path="";
                 String link=path.replaceFirst(".*/(\\w+)","$1");
-                s[i]=new Step(link, type, text, i);
+                s[i]=new Step(link, type, text, id);
                 i++;
                 c.moveToNext();
             }
@@ -59,5 +75,10 @@ public class Transfer {
 
         }
 
+    }
+
+    public int getLastUserID(Context context){
+        ProcedureDB procedureDB=new ProcedureDB(context);
+        return procedureDB.getLastUser();
     }
 }

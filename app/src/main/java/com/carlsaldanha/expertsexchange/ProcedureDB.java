@@ -11,7 +11,7 @@ import android.database.sqlite.SQLiteOpenHelper;
  */
 public class ProcedureDB extends SQLiteOpenHelper {
     // If you change the database schema, you must increment the database version.
-    public static final int DATABASE_VERSION = 1;
+    public static final int DATABASE_VERSION = 2;
     public static final String DATABASE_NAME = "Procedures.db";
     public QueryManager qm=new QueryManager();
 
@@ -31,6 +31,27 @@ public class ProcedureDB extends SQLiteOpenHelper {
         long newRowId;
         newRowId = db.insert(Step.TABLE_NAME,null,values);
         return newRowId;
+    }
+
+    public int getLastUser(){
+        SQLiteDatabase db = this.getReadableDatabase();
+        String[] projection={"max(user_id)"};
+        String selection="id > ?";
+        Cursor c = db.query(
+                "StepRecorder",  // The table to query
+                projection,                               // The columns to return
+                null,                                // The columns for the WHERE clause
+                null,                            // The values for the WHERE clause
+                null,                                     // don't group the rows
+                null,                                     // don't filter by row groups
+                null                                 // The sort order
+        );
+
+        c.moveToFirst();
+        if(c.isAfterLast())
+            return -1;
+        int itemId = c.getInt(c.getColumnIndexOrThrow("max(user_id)"));
+        return itemId+1;
     }
 
     public Step getNextStep(long rowId){
@@ -75,8 +96,9 @@ public class ProcedureDB extends SQLiteOpenHelper {
     private class QueryManager{
         String SQL_CREATE_ENTRIES="";
         String SQL_DELETE_ENTRIES="";
-        String[] tables={"Procedure","Step"};
-        String [][] columns={{"Name"},{"Text","Type","Link"}};
+        String[] tables={"StepRecorder"};
+        String [][] columns={{"user_id","task_id","expert_user_id", "current_step_id", "start_time","end_time"}};
+
 
         QueryManager(){
             for (int i=0;i<tables.length;i+=1){
@@ -88,11 +110,11 @@ public class ProcedureDB extends SQLiteOpenHelper {
 
         private String _create(String table_name,String[] columns){
             String create_string= "CREATE TABLE "+ table_name+" (";
-            create_string+="id INT NOT NULL AUTO_INCREMENT,";
+            create_string+="id INT NOT NULL,";
             for (String column:columns) {
                 create_string+=column+" VARCHAR(500),";
             }
-            create_string = create_string.substring(0, create_string.length()-1);
+
             create_string+="PRIMARY KEY ( id ));";
             return create_string;
         }

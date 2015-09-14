@@ -1,13 +1,23 @@
 package com.carlsaldanha.expertsexchange;
 
 import android.content.Intent;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.channels.FileChannel;
 
 public class Main2Activity extends AppCompatActivity {
 
@@ -20,15 +30,28 @@ public class Main2Activity extends AppCompatActivity {
         user_id=(EditText)findViewById(R.id.user_id);
         task_id=(EditText)findViewById(R.id.task_id);
         Button button=(Button) findViewById(R.id.button);
+
+        ProcedureDB pd=new ProcedureDB(this);
+        Log.d("uno",pd.getLastUser()+"");
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(Main2Activity.this, MainActivity.class);
-                intent.putExtra("user_id", user_id.getText());
-                intent.putExtra("task_id", task_id.getText());
+                intent.putExtra("user_id", user_id.getText().toString());
+                intent.putExtra("task_id", task_id.getText().toString());
                 startActivity(intent);
             }
         });
+
+        findViewById(R.id.export).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("uno","lick");
+                backupDatabase();
+            }
+        });
+
+
     }
 
     @Override
@@ -37,6 +60,41 @@ public class Main2Activity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.menu_main2, menu);
         return true;
     }
+
+    public final void backupDatabase() {
+            File f = this.getDatabasePath(ProcedureDB.DATABASE_NAME);
+            OutputStream myOutput=null;
+        Log.d("uno",f.getAbsolutePath());
+            InputStream myInput=null;
+            if (f.exists()) {
+                try {
+                    File directory = new File(Environment.getExternalStorageDirectory()+"/proceduredb.db");
+                    Log.d("uno","i");
+                    FileChannel src = new FileInputStream(f).getChannel();
+                    FileChannel dst = new FileOutputStream(directory).getChannel();
+                    dst.transferFrom(src, 0, src.size());
+                    src.close();
+                    dst.close();
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    try {
+                        if (myOutput != null) {
+                            myOutput.close();
+                            myOutput = null;
+                        }
+                        if (myInput != null) {
+                            myInput.close();
+                            myInput = null;
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

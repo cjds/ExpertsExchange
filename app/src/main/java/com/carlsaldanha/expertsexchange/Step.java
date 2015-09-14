@@ -18,7 +18,8 @@ public class Step {
         this.link=link;
         this.type=type;
         this.id=id;
-        this.text=text;
+        this.text=text.substring(0,1).toUpperCase()+text.substring(1);
     }
+
 
 }

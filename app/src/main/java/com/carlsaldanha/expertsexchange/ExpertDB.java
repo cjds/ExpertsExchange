@@ -15,15 +15,18 @@ import java.io.OutputStream;
  * Created by Carl Saldanha on 9/9/2015.
  */
 public class ExpertDB extends SQLiteOpenHelper {
-    private static String DB_PATH="/data/data/com.carlsaldanha.expertsexchange";
+    private static String DB_PATH="/data/data/com.carlsaldanha.expertsexchange/databases/";
+
     private static String DB_NAME="expertDB";
 
     private SQLiteDatabase myDataBase;
     private final Context context;
 
     public ExpertDB(Context context) {
-        super(context, DB_NAME, null, 1);
+        super(context, DB_NAME, null, 3);
         this.context=context;
+        DB_PATH = context.getApplicationInfo().dataDir + "/databases/";
+
     }
 
     public void createDataBase() throws IOException {
@@ -37,15 +40,11 @@ public class ExpertDB extends SQLiteOpenHelper {
             //By calling this method and empty database will be created into the default system path
             //of your application so we are gonna be able to overwrite that database with our database.
             this.getReadableDatabase();
-
             try {
-
                 copyDataBase();
-
             } catch (IOException e) {
-
+                e.printStackTrace();
                 throw new Error("Error copying database");
-
             }
         }
 
